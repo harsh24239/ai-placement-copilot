@@ -131,3 +131,28 @@ class RoadmapRequest(BaseModel):
 async def roadmap_endpoint(request: RoadmapRequest):
     roadmap = create_roadmap(request.missing_skills, request.available_weeks)
     return roadmap
+
+from memory.long_term import save_progress, get_progress
+
+class SaveProgressRequest(BaseModel):
+    user_id: str
+    resume_ats_score: float = None
+    weak_topics: list[str] = None
+    session_summary: str = None
+
+@router.post("/memory/save")
+async def save_progress_endpoint(request: SaveProgressRequest):
+    save_progress(
+        user_id=request.user_id,
+        resume_ats_score=request.resume_ats_score,
+        weak_topics=request.weak_topics,
+        session_summary=request.session_summary
+    )
+    return {"status": "saved"}
+
+@router.get("/memory/{user_id}")
+async def get_progress_endpoint(user_id: str):
+    progress = get_progress(user_id)
+    if progress is None:
+        return {"status": "no_history", "message": "No prior sessions found for this user"}
+    return progress

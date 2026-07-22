@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.upload import router as upload_router
 
 app = FastAPI(title="AI Placement Copilot")
+from database.init_db import init_db
+
+init_db()
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,3 +20,4 @@ app.include_router(upload_router)
 @app.get("/health")
 def health_check():
     return {"status": "ok", "message": "Backend is alive"}
+
