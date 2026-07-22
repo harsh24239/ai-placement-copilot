@@ -192,3 +192,25 @@ class DsaCoachRequest(BaseModel):
 async def dsa_coach_endpoint(request: DsaCoachRequest):
     result = coach_on_topic(request.weak_topic)
     return result
+
+from memory.session_manager import create_session
+from agents.interviewer.agent import start_interview, continue_interview
+
+class StartInterviewRequest(BaseModel):
+    topic: str
+
+@router.post("/interview/start")
+async def start_interview_endpoint(request: StartInterviewRequest):
+    session_id = create_session()
+    question = start_interview(session_id, request.topic)
+    return {"session_id": session_id, "message": question}
+
+
+class ContinueInterviewRequest(BaseModel):
+    session_id: str
+    answer: str
+
+@router.post("/interview/continue")
+async def continue_interview_endpoint(request: ContinueInterviewRequest):
+    response = continue_interview(request.session_id, request.answer)
+    return {"session_id": request.session_id, "message": response}
