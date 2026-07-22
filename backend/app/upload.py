@@ -120,3 +120,14 @@ class PlanRequest(BaseModel):
 async def plan_endpoint(request: PlanRequest):
     plan = create_plan(request.user_goal, request.has_resume, request.has_jd)
     return plan
+
+from agents.roadmap.agent import create_roadmap
+
+class RoadmapRequest(BaseModel):
+    missing_skills: list[str]
+    available_weeks: int = 4
+
+@router.post("/roadmap")
+async def roadmap_endpoint(request: RoadmapRequest):
+    roadmap = create_roadmap(request.missing_skills, request.available_weeks)
+    return roadmap
