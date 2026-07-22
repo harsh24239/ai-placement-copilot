@@ -214,3 +214,10 @@ class ContinueInterviewRequest(BaseModel):
 async def continue_interview_endpoint(request: ContinueInterviewRequest):
     response = continue_interview(request.session_id, request.answer)
     return {"session_id": request.session_id, "message": response}
+
+from agents.feedback.agent import generate_feedback
+
+@router.get("/interview/feedback/{session_id}")
+async def feedback_endpoint(session_id: str):
+    feedback = generate_feedback(session_id)
+    return feedback
