@@ -156,3 +156,29 @@ async def get_progress_endpoint(user_id: str):
     if progress is None:
         return {"status": "no_history", "message": "No prior sessions found for this user"}
     return progress
+
+from rag.ingestion import ingest_document
+from agents.rag_qa.agent import answer_from_documents
+
+@router.post("/rag/ingest")
+async def ingest_endpoint(
+    file: UploadFile = File(...),
+    user_id: str = "harsh"
+):
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+
+    file_bytes = await file.read()
+    text = extract_text_from_pdf(file_bytes)
+    result = ingest_document(text, document_name=file.filename, user_id=user_id)
+    return result
+
+
+class RagQuestionRequest(BaseModel):
+    question: str
+    user_id: str = "harsh"
+
+@router.post("/rag/ask")
+async def rag_ask_endpoint(request: RagQuestionRequest):
+    result = answer_from_documents(request.question, request.user_id)
+    return result
