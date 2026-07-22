@@ -107,3 +107,16 @@ async def run_placement_workflow(
         "jd_analysis": result["jd_analysis"],
         "skill_gap": result["skill_gap"]
     }
+
+from agents.planner.agent import create_plan
+from pydantic import BaseModel
+
+class PlanRequest(BaseModel):
+    user_goal: str
+    has_resume: bool = False
+    has_jd: bool = False
+
+@router.post("/plan")
+async def plan_endpoint(request: PlanRequest):
+    plan = create_plan(request.user_goal, request.has_resume, request.has_jd)
+    return plan
