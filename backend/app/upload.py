@@ -83,3 +83,27 @@ async def analyze_full_endpoint(
         "jd_analysis": jd_analysis,
         "skill_gap": skill_gap
     }
+
+from workflows.placement_workflow import placement_graph
+
+@router.post("/workflow/placement")
+async def run_placement_workflow(
+    resume_file: UploadFile = File(...),
+    jd_file: UploadFile = File(...)
+):
+    if resume_file.content_type != "application/pdf" or jd_file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+
+    resume_bytes = await resume_file.read()
+    jd_bytes = await jd_file.read()
+
+    result = placement_graph.invoke({
+        "resume_bytes": resume_bytes,
+        "jd_bytes": jd_bytes
+    })
+
+    return {
+        "resume_analysis": result["resume_analysis"],
+        "jd_analysis": result["jd_analysis"],
+        "skill_gap": result["skill_gap"]
+    }
