@@ -41,3 +41,14 @@ async def analyze_resume_endpoint(file: UploadFile = File(...)):
     text = extract_text_from_pdf(file_bytes)
     analysis = analyze_resume(text)
     return analysis
+from agents.job_description.agent import analyze_jd
+
+@router.post("/analyze/jd")
+async def analyze_jd_endpoint(file: UploadFile = File(...)):
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+
+    file_bytes = await file.read()
+    text = extract_text_from_pdf(file_bytes)
+    analysis = analyze_jd(text)
+    return analysis
