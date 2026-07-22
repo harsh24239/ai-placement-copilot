@@ -182,3 +182,13 @@ class RagQuestionRequest(BaseModel):
 async def rag_ask_endpoint(request: RagQuestionRequest):
     result = answer_from_documents(request.question, request.user_id)
     return result
+
+from agents.dsa_coach.agent import coach_on_topic
+
+class DsaCoachRequest(BaseModel):
+    weak_topic: str
+
+@router.post("/dsa/coach")
+async def dsa_coach_endpoint(request: DsaCoachRequest):
+    result = coach_on_topic(request.weak_topic)
+    return result
