@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 
 export default function DsaCoach() {
   const [topic, setTopic] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const { token, updateCredits } = useAuth()
 
   const handleSubmit = async () => {
     if (!topic.trim()) {
@@ -16,14 +18,18 @@ export default function DsaCoach() {
     setResult(null)
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/dsa/coach', {
+      const response = await fetch('http://127.0.0.1:8000/dsa/coach/protected', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ weak_topic: topic })
       })
-      if (!response.ok) throw new Error('Server returned an error')
       const data = await response.json()
+      if (!response.ok) throw new Error(data.detail || 'Server returned an error')
       setResult(data)
+      updateCredits(data.credits_remaining)
     } catch (err) {
       setError(err.message)
     }
@@ -36,7 +42,7 @@ export default function DsaCoach() {
         <div className="page-eyebrow">Step 2 of 3</div>
         <h1 className="page-title">DSA Coach</h1>
         <p className="page-subtitle">
-          Tell us a topic you're weak in. We'll recommend problems and a short strategy to approach them.
+          Tell us a topic you're weak in. We'll recommend problems and a short strategy to approach them. (Costs 1 credit)
         </p>
       </div>
 
