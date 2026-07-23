@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from tools.pdf_reader import extract_text_from_pdf
 from agents.resume.agent import analyze_resume
 
@@ -221,3 +221,15 @@ from agents.feedback.agent import generate_feedback
 async def feedback_endpoint(session_id: str):
     feedback = generate_feedback(session_id)
     return feedback
+
+from auth.credits import require_credits
+from database.models import User
+
+@router.post("/dsa/coach/protected")
+async def dsa_coach_protected_endpoint(
+    request: DsaCoachRequest,
+    current_user: User = Depends(require_credits(cost=1))
+):
+    result = coach_on_topic(request.weak_topic)
+    result["credits_remaining"] = current_user.credits_remaining
+    return result
